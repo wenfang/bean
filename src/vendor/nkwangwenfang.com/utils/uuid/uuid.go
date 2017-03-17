@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"nkwangwenfang.com/util/ipaddr"
+	"nkwangwenfang.com/utils/ipaddr"
 )
 
 const (
@@ -18,7 +18,7 @@ var seq uint32
 
 // New 创建新的唯一uuid
 func New() string {
-	localIP, err := ipaddr.LocalIP()
+	localIP, err := ipaddr.LocalIPv4()
 	if err != nil {
 		localIP = "127.0.0.1"
 	}

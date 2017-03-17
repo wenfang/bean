@@ -1,11 +1,11 @@
 package conv
 
 import (
-	"errors"
+	"reflect"
 	"strconv"
-)
 
-var errInvalidType = errors.New("invalid type")
+	"github.com/pkg/errors"
+)
 
 // ItoInt 接口类型转换为int
 func ItoInt(d interface{}) (int, error) {
@@ -41,7 +41,7 @@ func ItoInt(d interface{}) (int, error) {
 		}
 		return int(i), nil
 	}
-	return 0, errInvalidType
+	return 0, errors.Errorf("invalid type %s", reflect.TypeOf(d))
 }
 
 // ItoInt64 接口类型转换为int64
@@ -78,7 +78,7 @@ func ItoInt64(d interface{}) (int64, error) {
 		}
 		return i, nil
 	}
-	return 0, errInvalidType
+	return 0, errors.Errorf("invalid type %s", reflect.TypeOf(d))
 }
 
 // ItoUint 接口类型转换为uint
@@ -115,7 +115,7 @@ func ItoUint(d interface{}) (uint, error) {
 		}
 		return uint(u), nil
 	}
-	return 0, errInvalidType
+	return 0, errors.Errorf("invalid type %s", reflect.TypeOf(d))
 }
 
 // ItoUint64 接口类型转换为uint64
@@ -152,7 +152,7 @@ func ItoUint64(d interface{}) (uint64, error) {
 		}
 		return u, nil
 	}
-	return 0, errInvalidType
+	return 0, errors.Errorf("invalid type %s", reflect.TypeOf(d))
 }
 
 // ItoFloat64 接口类型转换为float64
@@ -189,7 +189,7 @@ func ItoFloat64(d interface{}) (float64, error) {
 		}
 		return f, nil
 	}
-	return 0, errInvalidType
+	return 0, errors.Errorf("invalid type %s", reflect.TypeOf(d))
 }
 
 // ItoString 接口类型转换为string
@@ -222,5 +222,5 @@ func ItoString(d interface{}) (string, error) {
 	case string:
 		return v, nil
 	}
-	return "", errInvalidType
+	return "", errors.Errorf("invalid type %s", reflect.TypeOf(d))
 }

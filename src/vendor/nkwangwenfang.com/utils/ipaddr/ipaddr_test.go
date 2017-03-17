@@ -5,5 +5,6 @@ import (
 )
 
 func TestLocalIP(t *testing.T) {
-	t.Log(LocalIP())
+	t.Log(LocalIPv4())
+	t.Log(LocalIPv4Bytes())
 }

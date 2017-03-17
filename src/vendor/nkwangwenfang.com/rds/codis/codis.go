@@ -8,11 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	// ErrNoConn 无连接错误
-	ErrNoConn = errors.New("no redis connection")
-)
-
 // Codis 结构
 type Codis []*redis.Pool
 
@@ -55,7 +50,7 @@ func (co Codis) getConn() redis.Conn {
 func (co Codis) DoCmd(cmd string, args ...interface{}) (interface{}, error) {
 	c := co.getConn()
 	if c == nil {
-		return nil, ErrNoConn
+		return nil, errors.New("no redis connection")
 	}
 	defer c.Close()
 
@@ -66,7 +61,7 @@ func (co Codis) DoCmd(cmd string, args ...interface{}) (interface{}, error) {
 func (co Codis) DoScript(script *redis.Script, args ...interface{}) (interface{}, error) {
 	c := co.getConn()
 	if c == nil {
-		return nil, ErrNoConn
+		return nil, errors.New("no redis connection")
 	}
 	defer c.Close()
 
