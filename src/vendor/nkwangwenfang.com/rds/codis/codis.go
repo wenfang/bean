@@ -13,15 +13,15 @@ type Codis []*redis.Pool
 
 // New 创建访问Codis的连接池
 func New(config Config) Codis {
-	co := make(Codis, len(config.Addrs))
+	c := make(Codis, len(config.Addrs))
 	for idx, addr := range config.Addrs {
-		co[idx] = &redis.Pool{
+		c[idx] = &redis.Pool{
 			MaxIdle:     config.MaxIdle,
 			MaxActive:   config.MaxActive,
 			IdleTimeout: config.IdleTimeout * time.Millisecond,
 			Wait:        config.Wait,
 			Dial: func() (redis.Conn, error) {
-				c, err := redis.DialTimeout(
+				conn, err := redis.DialTimeout(
 					"tcp",
 					addr,
 					config.ConnectTimeout*time.Millisecond,
@@ -31,46 +31,46 @@ func New(config Config) Codis {
 				if err != nil {
 					return nil, errors.Wrap(err, "redis dial error")
 				}
-				return c, nil
+				return conn, nil
 			},
 		}
 	}
-	return co
+	return c
 }
 
-func (co Codis) getConn() redis.Conn {
-	cnt := len(co)
+func (c Codis) getConn() redis.Conn {
+	cnt := len(c)
 	if cnt == 0 {
 		return nil
 	}
-	return co[rand.Intn(cnt)].Get()
+	return c[rand.Intn(cnt)].Get()
 }
 
 // DoCmd 执行redis命令
-func (co Codis) DoCmd(cmd string, args ...interface{}) (interface{}, error) {
-	c := co.getConn()
-	if c == nil {
+func (c Codis) DoCmd(cmd string, args ...interface{}) (interface{}, error) {
+	conn := c.getConn()
+	if conn == nil {
 		return nil, errors.New("no redis connection")
 	}
-	defer c.Close()
+	defer conn.Close()
 
-	return c.Do(cmd, args...)
+	return conn.Do(cmd, args...)
 }
 
 // DoScript 执行redis脚本
-func (co Codis) DoScript(script *redis.Script, args ...interface{}) (interface{}, error) {
-	c := co.getConn()
-	if c == nil {
+func (c Codis) DoScript(script *redis.Script, args ...interface{}) (interface{}, error) {
+	conn := c.getConn()
+	if conn == nil {
 		return nil, errors.New("no redis connection")
 	}
-	defer c.Close()
+	defer conn.Close()
 
-	return script.Do(c, args...)
+	return script.Do(conn, args...)
 }
 
 // Close 关闭redis连接池
-func (co Codis) Close() {
-	for _, p := range co {
+func (c Codis) Close() {
+	for _, p := range c {
 		p.Close()
 	}
 }
