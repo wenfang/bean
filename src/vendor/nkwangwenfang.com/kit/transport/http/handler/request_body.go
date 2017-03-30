@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 )
 
 func parseRequestBody(req *http.Request, v interface{}) (interface{}, error) {
-	//TODO: 解析JSON请求体
+	if err := json.NewDecoder(req.Body).Decode(v); err != nil {
+		return err.Error(), ErrorBody
+	}
 	return nil, nil
 }
