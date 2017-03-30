@@ -1,5 +1,6 @@
-package example
+package controller
 
+/*
 import (
 	"context"
 	"net/http"
@@ -25,7 +26,6 @@ type setStatusRequest struct {
 	FreezeStatus *int    `httpreq:"freeze_status"`
 }
 
-/*
 var setStatusCounter = expvar.NewCounter("setStatus")
 
 func decodeSetStatusRequest(ctx context.Context, request *http.Request) (interface{}, error) {
@@ -37,7 +37,6 @@ func decodeSetStatusRequest(ctx context.Context, request *http.Request) (interfa
 	}
 	return req, nil
 }
-*/
 
 func setStatus(ctx context.Context, r interface{}) (interface{}, error) {
 	req := r.(*setStatusRequest)
@@ -102,3 +101,4 @@ func init() {
 	http.HandleFunc("/", handler.NotFound)
 	http.Handle("/setStatus", sign.Sign(handler.New(context.Background(), setStatus, reflect.TypeOf(setStatusRequest{}))))
 }
+*/

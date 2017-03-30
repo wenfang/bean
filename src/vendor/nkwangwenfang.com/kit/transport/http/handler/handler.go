@@ -11,42 +11,53 @@ import (
 type handler struct {
 	ctx context.Context
 	e   endpoint.Endpoint
-	t   reflect.Type
+	typ reflect.Type
 }
 
-func New(ctx context.Context, e endpoint.Endpoint, t reflect.Type) http.Handler {
-	return &handler{ctx: ctx, e: e, t: t}
+// New 创建一个http.Handler, t的类型支持两种，Struct和Slice
+func New(ctx context.Context, e endpoint.Endpoint, request interface{}) http.Handler {
+	return &handler{ctx: ctx, e: e, typ: reflect.TypeOf(request)}
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h.t.Kind() != reflect.Struct {
-		EncodeError(w, &ErrorReason{Reason: "obj must be struct"}, ErrInner)
+	// 类型必须为struct或slice
+	if h.typ.Kind() != reflect.Struct && h.typ.Kind() != reflect.Slice {
+		OutputError(w, &ErrorReason{Reason: "request must be struct or slice"}, ErrorInner)
 		return
 	}
-	// 创建请求，类型为interface{}，内部必须为一个指向结构体的指针
-	req := reflect.New(h.t).Interface()
-	// 解析HTTP请求
-	if errReason, err := decodeRequest(r, req); err != nil {
-		EncodeError(w, errReason, err)
+	// 设置缺省的返回Content-Type
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	// 创建请求，类型为interface{}，内部必须为一个指针,指向slice或struct
+	request := reflect.New(h.typ).Interface()
+	if errReason, err := parseRequestPath(r, request); err != nil {
+		OutputError(w, errReason, err)
 		return
 	}
-	// 解析HTTP JSON请求体
-	if errReason, err := decodeRequestBody(r, req); err != nil {
-		EncodeError(w, errReason, err)
+	// 解析HTTP请求,来自url参数
+	if errReason, err := parseRequestParam(r, request); err != nil {
+		OutputError(w, errReason, err)
+		return
+	}
+	// 解析HTTP请求,来自JSON请求体
+	if errReason, err := parseRequestBody(r, request); err != nil {
+		OutputError(w, errReason, err)
 		return
 	}
 	// 执行请求处理，生成响应
-	rsp, err := h.e(h.ctx, req)
+	response, err := h.e(h.ctx, request)
 	if err != nil {
-		EncodeError(w, rsp, err)
+		OutputError(w, response, err)
 		return
 	}
 	// 输出响应
-	if err := EncodeResponse(w, rsp); err != nil {
-		EncodeError(w, &ErrorReason{Reason: "encode response error"}, err)
+	if err := OutputResponse(w, response); err != nil {
+		OutputError(w, &ErrorReason{Reason: "encode response error"}, err)
 	}
 }
 
+// NotFound 未发现对应的请求实体
 func NotFound(w http.ResponseWriter, r *http.Request) {
-	EncodeError(w, nil, ErrEntity)
+	// 设置缺省的返回Content-Type
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	OutputError(w, nil, ErrorEntity)
 }

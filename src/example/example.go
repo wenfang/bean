@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	"context"
@@ -13,12 +13,10 @@ import (
 	// 注释压制golint
 	_ "nkwangwenfang.com/kit/pprof"
 	"nkwangwenfang.com/log"
-	"nkwangwenfang.com/util/pidfile"
+	"nkwangwenfang.com/utils/pidfile"
 
-	"xiaojukeji.com/melon/db"
+	"example/router"
 )
-
-var GlobalDB *db.StatusDB
 
 func main() {
 	flag.Parse()
@@ -44,13 +42,8 @@ func main() {
 			}
 		}()
 	}
-	// 逻辑代码部分
-	GlobalDB, err = db.New(cfg.DB)
-	if err != nil {
-		log.Error("status db open error", "error", err)
-		return
-	}
-	defer GlobalDB.Close()
+	// 初始化路由设置
+	router.Init()
 	// 启动http server
 	go func() {
 		if err := http.ListenAndServe(cfg.BindAddr, nil); err != nil {

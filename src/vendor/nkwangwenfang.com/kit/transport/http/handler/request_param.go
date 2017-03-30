@@ -95,16 +95,28 @@ func setValue(rv reflect.Value, kind reflect.Kind, fieldName string, fieldValue 
 	return nil
 }
 
-func decodeRequest(req *http.Request, v interface{}) (interface{}, error) {
-	rv, errReason := parseObject(v)
-	if errReason != nil {
-		return errReason, ErrInner
+func parseRequestParam(r *http.Request, v interface{}) (interface{}, error) {
+	// 转换成对应的值类型
+	rv := reflect.ValueOf(v)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return fmt.Sprintf("request is not pointer or is nil"), ErrorInner
+	}
+	// 获取内层元素
+	rv = rv.Elem()
+
+	typ := rv.Type()
+	// 需要解析的对象必须是struct类型,如果不是直接返回
+	if typ.Kind() != reflect.Struct {
+		return nil, nil
 	}
 
-	for _, field := range parseFields(rv.Type()) {
-		fieldValue := req.FormValue(field.fieldName)
-		if fieldValue == "" && field.required {
-			return &ErrorReason{Reason: fmt.Sprintf("field %s must be set", field.fieldName)}, ErrParameter
+	for _, field := range parseRequestFields(typ) {
+		if field.loc != "param" {
+			continue
+		}
+		value := r.FormValue(field.fieldName)
+		if value == "" && field.required {
+			return &ErrorReason{Reason: fmt.Sprintf("field %s must be set", field.fieldName)}, ErrorParameter
 		}
 
 		f := rv.FieldByName(field.name)
@@ -113,23 +125,23 @@ func decodeRequest(req *http.Request, v interface{}) (interface{}, error) {
 		}
 
 		if field.typ.Kind() == reflect.Ptr {
-			if fieldValue != "" {
+			if value != "" {
 				n := reflect.New(field.typ.Elem())
-				if errReason := setValue(n.Elem(), field.typ.Elem().Kind(), field.fieldName, fieldValue); errReason != nil {
-					return errReason, ErrParameter
+				if errReason := setValue(n.Elem(), field.typ.Elem().Kind(), field.fieldName, value); errReason != nil {
+					return errReason, ErrorParameter
 				}
 				f.Set(n)
 			}
 			continue
 		}
-		if errReason := setValue(f, field.typ.Kind(), field.fieldName, fieldValue); errReason != nil {
-			return errReason, ErrParameter
+		if errReason := setValue(f, field.typ.Kind(), field.fieldName, value); errReason != nil {
+			return errReason, ErrorParameter
 		}
 	}
 	return nil, nil
 }
 
-func decodeRequestBody(req *http.Request, v interface{}) (interface{}, error) {
+func parseRequestBody(req *http.Request, v interface{}) (interface{}, error) {
 	//TODO: 解析JSON请求体
 	return nil, nil
 }

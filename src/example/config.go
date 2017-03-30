@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 
 	"nkwangwenfang.com/log"
-
-	"xiaojukeji.com/melon/db"
 )
 
 // Config melon配置
@@ -18,8 +16,7 @@ type Config struct {
 	ErrFile     string `json:"err_file"`
 	PidFile     string `json:"pid_file"`
 
-	BindAddr string    `json:"bind_addr"`
-	DB       db.Config `json:"db"`
+	BindAddr string `json:"bind_addr"`
 }
 
 var configFile = flag.String("config", "conf/melon.conf", "config file name")

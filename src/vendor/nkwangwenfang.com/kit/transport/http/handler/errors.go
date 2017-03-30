@@ -15,20 +15,23 @@ func (e *Error) Error() string {
 }
 
 var (
-	// ErrAuth 授权错误
-	ErrAuth = NewError(1, "Bad credentials")
-	// ErrEntity 不存在对应的实体
-	ErrEntity = NewError(2, "Unprocessable Entity")
-	// ErrMethod 不支持的方法
-	ErrMethod = NewError(3, "Unsupport Method")
-	// ErrParameter 请求参数错误
-	ErrParameter = NewError(4, "Parameter Error")
-	// ErrBody 请求体的JSON错误
-	ErrBody = NewError(5, "Problems parsing JSON")
-	// ErrInner 内部错误
-	ErrInner = NewError(999, "Internal Error")
+	// ErrorAuth 授权错误
+	ErrorAuth = NewError(1, "Bad credentials")
+	// ErrorEntity 不存在对应的实体
+	ErrorEntity = NewError(2, "Unprocessable Entity")
+	// ErrorMethod 不支持的方法
+	ErrorMethod = NewError(3, "Unsupport Method")
+	// ErrorPath 解析路径参数错误
+	ErrorPath = NewError(4, "Parse Path Error")
+	// ErrorParameter 请求参数错误
+	ErrorParameter = NewError(5, "Parameter Error")
+	// ErrorBody 请求体的JSON错误
+	ErrorBody = NewError(6, "Problems parsing JSON")
+	// ErrorInner 内部错误
+	ErrorInner = NewError(999, "Internal Error")
 )
 
+// ErrorReason 错误结构
 type ErrorReason struct {
 	Reason string `json:"reason,omitempty"`
 }

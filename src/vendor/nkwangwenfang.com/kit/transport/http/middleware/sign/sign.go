@@ -26,30 +26,30 @@ func Sign(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		clientSign := r.Header.Get("X-Signature")
 		if clientSign == "" {
-			handler.EncodeError(w, handler.ErrorReason{Reason: "Header X-Signature not set"}, handler.ErrAuth)
+			handler.OutputError(w, handler.ErrorReason{Reason: "Header X-Signature not set"}, handler.ErrorAuth)
 			return
 		}
 
 		appKey := keys[r.FormValue("app")]
 		if appKey == "" {
-			handler.EncodeError(w, handler.ErrorReason{Reason: "app not set"}, handler.ErrAuth)
+			handler.OutputError(w, handler.ErrorReason{Reason: "app not set"}, handler.ErrorAuth)
 			return
 		}
 
 		timestamp, err := strconv.ParseInt(r.FormValue("timestamp"), 10, 64)
 		if err != nil {
-			handler.EncodeError(w, handler.ErrorReason{Reason: "timestamp invalid"}, handler.ErrAuth)
+			handler.OutputError(w, handler.ErrorReason{Reason: "timestamp invalid"}, handler.ErrorAuth)
 			return
 		}
 
 		now := time.Now().Unix()
 		if now-timestamp > timeLimit || now-timestamp < -timeLimit {
-			handler.EncodeError(w, handler.ErrorReason{Reason: "signature expired"}, handler.ErrAuth)
+			handler.OutputError(w, handler.ErrorReason{Reason: "signature expired"}, handler.ErrorAuth)
 			return
 		}
 
 		if r.FormValue("nonce") == "" {
-			handler.EncodeError(w, handler.ErrorReason{Reason: "nonce not set"}, handler.ErrAuth)
+			handler.OutputError(w, handler.ErrorReason{Reason: "nonce not set"}, handler.ErrorAuth)
 			return
 		}
 
@@ -67,7 +67,7 @@ func Sign(h http.Handler) http.Handler {
 		serverSign = strings.ToUpper(serverSign)
 
 		if clientSign != serverSign {
-			handler.EncodeError(w, nil, handler.ErrAuth)
+			handler.OutputError(w, nil, handler.ErrorAuth)
 			return
 		}
 
