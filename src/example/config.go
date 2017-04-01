@@ -5,16 +5,15 @@ import (
 	"flag"
 	"io/ioutil"
 
+	"nkwangwenfang.com/kit/monitor"
 	"nkwangwenfang.com/log"
 )
 
 // Config melon配置
 type Config struct {
-	MonitorAddr string `json:"monitor_addr"`
-	LogLevel    string `json:"log_level"`
-	LogFile     string `json:"log_file"`
-	ErrFile     string `json:"err_file"`
-	PidFile     string `json:"pid_file"`
+	Monitor monitor.Config `json:"monitor"`
+	Log     log.Config     `json:"log"`
+	PidFile string         `json:"pid_file"`
 
 	BindAddr string `json:"bind_addr"`
 }

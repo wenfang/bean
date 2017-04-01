@@ -16,5 +16,7 @@ func Init() {
 	r.NotFoundHandler = http.HandlerFunc(handler.NotFound)
 
 	r.Handle("/products/{keys}/{id:[0-9]+}", controller.ProductsV1Controller).Methods("GET")
+	r.Handle("/cars", controller.CarsV1Controller).Methods("GET")
+
 	http.Handle("/", r)
 }

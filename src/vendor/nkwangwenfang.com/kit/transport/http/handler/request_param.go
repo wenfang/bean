@@ -29,7 +29,7 @@ func parseRequestParam(r *http.Request, v interface{}) (interface{}, error) {
 		// 取出来要设置的值
 		value := r.FormValue(field.fieldName)
 		if value == "" && field.required {
-			return fmt.Sprintf("field %s must be set", field.fieldName), ErrorParameter
+			return fmt.Sprintf("field [%s] must be set", field.fieldName), ErrorParameter
 		}
 		// 取出来要设置的域
 		f := rv.FieldByName(field.name)

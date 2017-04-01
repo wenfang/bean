@@ -2,17 +2,13 @@ package monitor
 
 import (
 	"context"
-	"errors"
 	"net/http"
+
+	"nkwangwenfang.com/log"
 )
 
 var (
-	errMonitorRunning = errors.New("monitor server is running")
-)
-
-var (
-	monitorMux    = http.NewServeMux()
-	monitorServer *http.Server
+	monitorMux = http.NewServeMux()
 )
 
 // Handle 定义monitor对pattern的处理handler
@@ -23,27 +19,35 @@ func HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)
 	monitorMux.HandleFunc(pattern, handler)
 }
 
-// ListenAndServe 监听tcp地址启动服务
-func ListenAndServe(addr string) error {
-	if monitorServer != nil {
-		return errMonitorRunning
-	}
-	monitorServer = &http.Server{Addr: addr, Handler: monitorMux}
-	return monitorServer.ListenAndServe()
+// Server Monitor Server结构
+type Server struct {
+	*http.Server
 }
 
-// Close 关闭monitorServer
-func Close() error {
-	if monitorServer == nil {
-		return nil
+// New 创建一个新的Monitor Server
+func New(config Config) *Server {
+	var server Server
+	if config.Addr != "" {
+		server.Server = &http.Server{Addr: config.Addr, Handler: monitorMux}
+		go func() {
+			if err := server.ListenAndServe(); err != nil {
+				log.Error("monitor server listen error", "addr", config.Addr, "error", err)
+			}
+		}()
 	}
-	return monitorServer.Close()
+	return &server
 }
 
-// Shutdown 优雅关闭monitorServer
-func Shutdown(ctx context.Context) error {
-	if monitorServer == nil {
+func (server *Server) Shutdown(ctx context.Context) error {
+	if server.Server == nil {
 		return nil
 	}
-	return monitorServer.Shutdown(ctx)
+	return server.Server.Shutdown(ctx)
+}
+
+func (server *Server) Close() error {
+	if server.Server == nil {
+		return nil
+	}
+	return server.Server.Close()
 }

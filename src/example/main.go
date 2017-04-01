@@ -26,7 +26,7 @@ func main() {
 		return
 	}
 	// 设置日志
-	log.Init(cfg.LogFile, cfg.ErrFile, cfg.LogLevel)
+	log.Init(cfg.Log)
 	// 创建pid文件
 	if cfg.PidFile != "" {
 		if err := pidfile.Save(cfg.PidFile); err != nil {
@@ -35,13 +35,8 @@ func main() {
 		defer pidfile.Remove(cfg.PidFile)
 	}
 	// 启动monitor
-	if cfg.MonitorAddr != "" {
-		go func() {
-			if err := monitor.ListenAndServe(cfg.MonitorAddr); err != nil {
-				log.Error("monitor listen error", "monitor_addr", cfg.MonitorAddr, "error", err)
-			}
-		}()
-	}
+	monitorServer := monitor.New(cfg.Monitor)
+	defer monitorServer.Shutdown(context.Background())
 	// 初始化路由设置
 	router.Init()
 	// 启动http server
@@ -58,10 +53,9 @@ func main() {
 		switch sig {
 		case syscall.SIGUSR1:
 			log.Info("melon got SIGUSR1 signal, change log")
-			log.Init(cfg.LogFile, cfg.ErrFile, cfg.LogLevel)
+			log.Init(cfg.Log)
 			continue
 		}
-		monitor.Shutdown(context.Background())
 		log.Info("melon got signal, exit", "sig", sig)
 		break
 	}

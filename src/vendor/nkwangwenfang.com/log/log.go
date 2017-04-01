@@ -171,18 +171,18 @@ func SetErrFile(filename string) error {
 }
 
 // Init 初始化日志
-func Init(logFileName, errFileName, logLevel string) {
-	if logFileName != "" {
-		if err := SetLogFile(logFileName); err != nil {
-			Error("set log file error", "filename", logFileName, "error", err)
+func Init(config Config) {
+	if config.LogFile != "" {
+		if err := SetLogFile(config.LogFile); err != nil {
+			Error("set log file error", "filename", config.LogFile, "error", err)
 		}
 	}
-	if errFileName != "" {
-		if err := SetErrFile(errFileName); err != nil {
-			Error("set err file error", "filename", errFileName, "error", err)
+	if config.ErrFile != "" {
+		if err := SetErrFile(config.ErrFile); err != nil {
+			Error("set error file error", "filename", config.ErrFile, "error", err)
 		}
 	}
-	if logLevel != "" {
-		SetLevel(logLevel)
+	if config.LogLevel != "" {
+		SetLevel(config.LogLevel)
 	}
 }
