@@ -37,14 +37,18 @@ func main() {
 	// 启动monitor
 	monitorServer := monitor.New(cfg.Monitor)
 	defer monitorServer.Shutdown(context.Background())
+
+	// 开始特定于http server的服务
 	// 初始化路由设置
 	router.Init()
 	// 启动http server
 	go func() {
+		log.Debug("start http server", "addr", cfg.BindAddr)
 		if err := http.ListenAndServe(cfg.BindAddr, nil); err != nil {
-			log.Error("server start error", "error", err)
+			log.Error("http server start error", "error", err)
 		}
 	}()
+
 	// 等待信号
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGUSR1)
@@ -52,11 +56,11 @@ func main() {
 		sig := <-sigChan
 		switch sig {
 		case syscall.SIGUSR1:
-			log.Info("melon got SIGUSR1 signal, change log")
+			log.Info("example got SIGUSR1 signal, change log")
 			log.Init(cfg.Log)
 			continue
 		}
-		log.Info("melon got signal, exit", "sig", sig)
+		log.Info("example got signal, exit", "sig", sig)
 		break
 	}
 }

@@ -1,4 +1,4 @@
-package controller
+package cars
 
 import (
 	"context"

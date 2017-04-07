@@ -18,7 +18,7 @@ type Config struct {
 	BindAddr string `json:"bind_addr"`
 }
 
-var configFile = flag.String("config", "conf/melon.conf", "config file name")
+var configFile = flag.String("config", "conf/example.conf", "config file name")
 
 func loadConfig() (*Config, error) {
 	data, err := ioutil.ReadFile(*configFile)
