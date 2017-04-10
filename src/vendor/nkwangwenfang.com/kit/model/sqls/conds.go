@@ -1,50 +1,72 @@
 package sqls
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 )
 
-// Conds 代表WHERE条件
-type Conds struct {
-	Fields
-	Values map[string][]interface{}
+const (
+	TypEQ = iota // =
+	TypGT        // >
+	TypGE        // >=
+	TypLT        // <
+	TypLE        // <=
+	TypNE        // !=
+	TypLK        // LIKE
+)
+
+type Cond struct {
+	Field string
+	Value interface{}
+	Typ   int
 }
 
-func (conds Conds) parse() (string, []interface{}) {
-	sql := "WHERE"
-	var args []interface{}
-
-	for idx, field := range conds.Fields {
-		length := len(conds.Values[field])
-		if length == 0 {
-			continue
+func (cond Cond) ParseSQL() (string, error) {
+	// 处理类型为string的情况
+	if reflect.TypeOf(cond.Value).Kind() == reflect.String {
+		switch cond.Typ {
+		case TypEQ:
+			return fmt.Sprintf("%s = '%v'", cond.Field, cond.Value), nil
+		case TypLK:
+			return fmt.Sprintf("%s LIKE '%v'", cond.Field, cond.Value), nil
 		}
-		// 添加参数
-		args = append(args, conds.Values[field]...)
-		// 只有一个可选值用=
-		if length == 1 {
-			if idx == 0 {
-				sql += fmt.Sprintf(" %s=?", field)
-			} else {
-				sql += fmt.Sprintf(" AND %s=?", field)
-			}
-			continue
-		}
-		// 多于一个可选值用IN
-		if idx == 0 {
-			sql += fmt.Sprintf(" %s IN (", field)
-		} else {
-			sql += fmt.Sprintf(" AND %s IN (", field)
-		}
-
-		for i := 0; i < length; i++ {
-			if i == 0 {
-				sql += "?"
-			} else {
-				sql += ", ?"
-			}
-		}
-		sql += ")"
+		return "", errors.New("condition type error")
 	}
-	return sql, args
+	// 处理其他数值情况
+	switch cond.Typ {
+	case TypEQ:
+		return fmt.Sprintf("%s = %v", cond.Field, cond.Value), nil
+	case TypGT:
+		return fmt.Sprintf("%s > %v", cond.Field, cond.Value), nil
+	case TypGE:
+		return fmt.Sprintf("%s >= %v", cond.Field, cond.Value), nil
+	case TypLT:
+		return fmt.Sprintf("%s < %v", cond.Field, cond.Value), nil
+	case TypLE:
+		return fmt.Sprintf("%s <= %v", cond.Field, cond.Value), nil
+	case TypNE:
+		return fmt.Sprintf("%s != %v", cond.Field, cond.Value), nil
+	}
+	return "", errors.New("condition type error")
+}
+
+func (cond Cond) Parse() (string, []interface{}, error) {
+	switch cond.Typ {
+	case TypEQ:
+		return fmt.Sprintf("%s = ?", cond.Field), []interface{}{cond.Value}, nil
+	case TypGT:
+		return fmt.Sprintf("%s > ?", cond.Field), []interface{}{cond.Value}, nil
+	case TypGE:
+		return fmt.Sprintf("%s >= ?", cond.Field), []interface{}{cond.Value}, nil
+	case TypLT:
+		return fmt.Sprintf("%s < ?", cond.Field), []interface{}{cond.Value}, nil
+	case TypLE:
+		return fmt.Sprintf("%s <= ?", cond.Field), []interface{}{cond.Value}, nil
+	case TypNE:
+		return fmt.Sprintf("%s != ?", cond.Field), []interface{}{cond.Value}, nil
+	case TypLK:
+		return fmt.Sprintf("%s LIKE ?", cond.Field), []interface{}{cond.Value}, nil
+	}
+	return "", nil, errors.New("condition type error")
 }

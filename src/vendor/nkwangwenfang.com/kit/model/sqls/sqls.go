@@ -1,11 +1,12 @@
 package sqls
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
 
-func SelectSQL(tableName string, selects Fields, conds Conds) (string, []interface{}) {
+func SelectSQL(tableName string, selects Fields, conds Parser) (string, []interface{}, error) {
 	sql := fmt.Sprintf("SELECT ")
 
 	if len(selects) == 0 {
@@ -15,13 +16,16 @@ func SelectSQL(tableName string, selects Fields, conds Conds) (string, []interfa
 	}
 	sql += fmt.Sprintf(" FROM %s", tableName)
 
-	whereSql, whereArgs := conds.parse()
-	if len(whereArgs) == 0 { // 不允许没有WHERE的SELECT
-		return "", nil
+	whereSql, whereArgs, err := conds.Parse()
+	if err != nil {
+		return "", nil, err
 	}
-	sql += " " + whereSql
+	if len(whereArgs) == 0 { // 不允许没有WHERE的SELECT
+		return "", nil, errors.New("no where condition set")
+	}
+	sql += " WHERE " + whereSql
 
-	return sql, whereArgs
+	return sql, whereArgs, nil
 }
 
 func InsertSQL(tableName string, inserts FieldsValues) (string, []interface{}) {
@@ -50,7 +54,7 @@ func InsertUpdateSQL(tableName string, inserts, updates FieldsValues) (string, [
 	return sql, args
 }
 
-func UpdateSQL(tableName string, updates FieldsValues, conds Conds) (string, []interface{}) {
+func UpdateSQL(tableName string, updates FieldsValues, conds Parser) (string, []interface{}, error) {
 	sql := fmt.Sprintf("UPDATE %s SET", tableName)
 	for idx, field := range updates.Fields {
 		if idx == 0 {
@@ -60,23 +64,30 @@ func UpdateSQL(tableName string, updates FieldsValues, conds Conds) (string, []i
 		}
 	}
 
-	whereSql, whereArgs := conds.parse()
-	if len(whereArgs) == 0 { // 不允许没有WHERE的UPDATE
-		return "", nil
+	whereSql, whereArgs, err := conds.Parse()
+	if err != nil {
+		return "", nil, err
 	}
-	sql += " " + whereSql
+	if len(whereArgs) == 0 { // 不允许没有WHERE的UPDATE
+		return "", nil, errors.New("no where condition set")
+	}
+	sql += " WHERE " + whereSql
 	args := append(updates.Values, whereArgs...)
-	return sql, args
+
+	return sql, args, nil
 }
 
-func DeleteSQL(tableName string, conds Conds) (string, []interface{}) {
+func DeleteSQL(tableName string, conds Parser) (string, []interface{}, error) {
 	sql := fmt.Sprintf("DELETE FROM %s", tableName)
 
-	whereSql, whereArgs := conds.parse()
-	if len(whereArgs) == 0 { // 不允许没有WHERE的DELETE
-		return "", nil
+	whereSql, whereArgs, err := conds.Parse()
+	if err != nil {
+		return "", nil, err
 	}
-	sql += " " + whereSql
+	if len(whereArgs) == 0 { // 不允许没有WHERE的DELETE
+		return "", nil, errors.New("no where condition set")
+	}
+	sql += " WHERE " + whereSql
 
-	return sql, whereArgs
+	return sql, whereArgs, nil
 }
