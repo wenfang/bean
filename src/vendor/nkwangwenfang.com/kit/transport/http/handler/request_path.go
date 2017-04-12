@@ -13,7 +13,7 @@ func parseRequestPath(r *http.Request, v interface{}) (interface{}, error) {
 	// 转换成对应的值类型
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
-		return fmt.Sprintf("request is not pointer or is nil"), ErrorInner
+		return fmt.Sprintf("request is not pointer or is nil"), ErrorTypeInner
 	}
 	// 获取内层元素
 	rv = rv.Elem()
@@ -52,25 +52,25 @@ func parseRequestPath(r *http.Request, v interface{}) (interface{}, error) {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			vInt, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				return fmt.Sprintf("request field [%s] content [%s] parse int error", field.name, value), ErrorPath
+				return fmt.Sprintf("request field [%s] content [%s] parse int error", field.name, value), ErrorTypePath
 			}
 			f.SetInt(vInt)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			vUint, err := strconv.ParseUint(value, 10, 64)
 			if err != nil {
-				return fmt.Sprintf("request field [%s] content [%s] parse uint error", field.name, value), ErrorPath
+				return fmt.Sprintf("request field [%s] content [%s] parse uint error", field.name, value), ErrorTypePath
 			}
 			f.SetUint(vUint)
 		case reflect.Float32, reflect.Float64:
 			vFloat, err := strconv.ParseFloat(value, 64)
 			if err != nil {
-				return fmt.Sprintf("request field [%s] content [%s] parse float error", field.name, value), ErrorPath
+				return fmt.Sprintf("request field [%s] content [%s] parse float error", field.name, value), ErrorTypePath
 			}
 			f.SetFloat(vFloat)
 		case reflect.String:
 			f.SetString(value)
 		default:
-			return fmt.Sprintf("request field [%s] type [%s] not support", field.name, field.typ.Kind()), ErrorPath
+			return fmt.Sprintf("request field [%s] type [%s] not support", field.name, field.typ.Kind()), ErrorTypePath
 		}
 	}
 	return nil, nil

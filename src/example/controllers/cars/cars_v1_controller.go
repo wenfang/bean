@@ -12,12 +12,13 @@ type carsRequest struct {
 }
 
 type carsResponse struct {
-	ID uint64 `json:"id"`
+	ID     uint64 `json:"id"`
+	Errors string `json:"errors"`
 }
 
 func carsV1Controller(ctx context.Context, req interface{}) (interface{}, error) {
-	request := req.(*carsRequest)
-	return &carsResponse{ID: request.ID}, nil
+	panic("panic test")
+	return "error test", handler.ErrorTypeInner
 }
 
 var CarsV1Controller = handler.New(context.Background(), carsV1Controller, carsRequest{})

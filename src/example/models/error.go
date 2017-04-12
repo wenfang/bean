@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	errSetDB = handler.NewError(20100, "set db error")
+	errSetDB = handler.NewErrorType(20100, "set db error")
 )

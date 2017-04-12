@@ -11,7 +11,7 @@ func parseRequestParam(r *http.Request, v interface{}) (interface{}, error) {
 	// 转换成对应的值类型
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
-		return fmt.Sprintf("request is not pointer or is nil"), ErrorInner
+		return fmt.Sprintf("request is not pointer or is nil"), ErrorTypeInner
 	}
 	// 获取内层元素
 	rv = rv.Elem()
@@ -21,15 +21,20 @@ func parseRequestParam(r *http.Request, v interface{}) (interface{}, error) {
 	if typ.Kind() != reflect.Struct {
 		return nil, nil
 	}
-
+	// 解析url命令行参数
+	urlValues, err := ParseURL(r)
+	if err != nil {
+		return fmt.Sprintf("parse url error, %s", err.Error()), ErrorTypeParameter
+	}
+	// 遍历每个域
 	for _, field := range parseRequestFields(typ) {
 		if field.loc != "param" {
 			continue
 		}
 		// 取出来要设置的值
-		value := r.FormValue(field.fieldName)
+		value := urlValues.Get(field.fieldName)
 		if value == "" && field.required {
-			return fmt.Sprintf("field [%s] must be set", field.fieldName), ErrorParameter
+			return fmt.Sprintf("field [%s] must be set", field.fieldName), ErrorTypeParameter
 		}
 		// 取出来要设置的域
 		f := rv.FieldByName(field.name)
@@ -50,25 +55,25 @@ func parseRequestParam(r *http.Request, v interface{}) (interface{}, error) {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			vInt, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				return fmt.Sprintf("request field [%s] content [%s] parse int error", field.name, value), ErrorParameter
+				return fmt.Sprintf("request field [%s] content [%s] parse int error", field.name, value), ErrorTypeParameter
 			}
 			f.SetInt(vInt)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			vUint, err := strconv.ParseUint(value, 10, 64)
 			if err != nil {
-				return fmt.Sprintf("request field [%s] content [%s] parse uint error", field.name, value), ErrorParameter
+				return fmt.Sprintf("request field [%s] content [%s] parse uint error", field.name, value), ErrorTypeParameter
 			}
 			f.SetUint(vUint)
 		case reflect.Float32, reflect.Float64:
 			vFloat, err := strconv.ParseFloat(value, 64)
 			if err != nil {
-				return fmt.Sprintf("request field [%s] content [%s] parse float error", field.name, value), ErrorParameter
+				return fmt.Sprintf("request field [%s] content [%s] parse float error", field.name, value), ErrorTypeParameter
 			}
 			f.SetFloat(vFloat)
 		case reflect.String:
 			f.SetString(value)
 		default:
-			return fmt.Sprintf("request field [%s] type [%s] not support", field.name, field.typ.Kind()), ErrorParameter
+			return fmt.Sprintf("request field [%s] type [%s] not support", field.name, field.typ.Kind()), ErrorTypeParameter
 		}
 	}
 	return nil, nil
