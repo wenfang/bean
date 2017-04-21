@@ -1,5 +1,0 @@
-package dconfig
-
-import (
-	"context"
-)

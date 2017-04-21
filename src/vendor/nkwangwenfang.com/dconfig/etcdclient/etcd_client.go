@@ -1,8 +1,9 @@
 package etcdclient
 
 import (
+	"context"
+
 	"github.com/coreos/etcd/client"
-	"golang.org/x/net/context"
 
 	"nkwangwenfang.com/dconfig"
 )
@@ -18,7 +19,7 @@ type etcdClient struct {
 func New(config Config) (dconfig.Client, error) {
 	// 创建etcd client
 	cfg := client.Config{
-		Endpoints: config.Servers,
+		Endpoints: config.Srvs,
 		Transport: client.DefaultTransport,
 	}
 	c, err := client.New(cfg)
@@ -27,7 +28,7 @@ func New(config Config) (dconfig.Client, error) {
 	}
 
 	ec := &etcdClient{
-		appName: prefix + "/" + config.App,
+		appName: prefix + "/" + config.App + "/" + config.Env + "/" + config.Tag,
 		keysAPI: client.NewKeysAPI(c),
 	}
 	return ec, nil

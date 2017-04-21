@@ -18,8 +18,8 @@ func (o *myObserver) ConfigUpdate(value string) {
 }
 
 var cfg = etcdclient.Config{
-	Servers: []string{"http://127.0.0.1:2379"},
-	App:     "test",
+	Srvs: []string{"http://127.0.0.1:2379"},
+	App:  "test",
 }
 
 func TestAuto(t *testing.T) {

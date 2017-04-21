@@ -10,8 +10,10 @@ import (
 )
 
 var cfg = Config{
-	Servers: []string{"http://127.0.0.1:2379"},
-	App:     "test",
+	Srvs: []string{"http://127.0.0.1:2379"},
+	App:  "test",
+	Env:  "dev",
+	Tag:  "all",
 }
 
 func TestEtcdClient(t *testing.T) {

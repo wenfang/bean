@@ -16,6 +16,7 @@ const (
 	TypLK        // LIKE
 )
 
+// Cond 代表一个SQL查询条件
 type Cond struct {
 	Field string
 	Value interface{}
