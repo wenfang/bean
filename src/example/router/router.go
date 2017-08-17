@@ -5,7 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"nkwangwenfang.com/kit/transport/http/handler"
+	"nkwangwenfang.com/kit/transport/http/handler1"
 	"nkwangwenfang.com/kit/transport/http/middleware/counter"
 
 	"example/controllers/cars"
@@ -15,7 +15,7 @@ import (
 // Init 初始化router
 func Init() {
 	r := mux.NewRouter()
-	r.NotFoundHandler = http.HandlerFunc(handler.NotFound)
+	r.NotFoundHandler = http.HandlerFunc(handler1.NotFound)
 
 	r.Handle("/products/{keys}/{id:[0-9]+}", products.ProductsV1Controller).Methods("GET")
 	r.Handle("/cars", counter.Counter("cars_counter", cars.CarsV1Controller)).Methods("GET")

@@ -36,13 +36,13 @@ func Sign(h http.Handler) http.Handler {
 			return
 		}
 
-		appKey := keys[urlValues.Get("app")]
+		appKey := keys[urlValues.GetString("app")]
 		if appKey == "" {
 			handler.OutputError(w, "app not set", handler.ErrorTypeAuth)
 			return
 		}
 
-		timestamp, err := strconv.ParseInt(urlValues.Get("timestamp"), 10, 64)
+		timestamp, err := strconv.ParseInt(urlValues.GetString("timestamp"), 10, 64)
 		if err != nil {
 			handler.OutputError(w, "timestamp invalid", handler.ErrorTypeAuth)
 			return
@@ -54,7 +54,7 @@ func Sign(h http.Handler) http.Handler {
 			return
 		}
 
-		if urlValues.Get("nonce") == "" {
+		if urlValues.GetString("nonce") == "" {
 			handler.OutputError(w, "nonce not set", handler.ErrorTypeAuth)
 			return
 		}

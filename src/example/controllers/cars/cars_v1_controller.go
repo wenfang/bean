@@ -3,7 +3,7 @@ package cars
 import (
 	"context"
 
-	"nkwangwenfang.com/kit/transport/http/handler"
+	"nkwangwenfang.com/kit/transport/http/handler1"
 )
 
 type carsRequest struct {
@@ -17,8 +17,7 @@ type carsResponse struct {
 }
 
 func carsV1Controller(ctx context.Context, req interface{}) (interface{}, error) {
-	panic("panic test")
-	return "error test", handler.ErrorTypeInner
+	return "error test", handler1.BeanInnerError
 }
 
-var CarsV1Controller = handler.New(context.Background(), carsV1Controller, carsRequest{})
+var CarsV1Controller = handler1.New(carsV1Controller, carsRequest{})

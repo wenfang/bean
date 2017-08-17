@@ -32,7 +32,7 @@ func parseRequestParam(r *http.Request, v interface{}) (interface{}, error) {
 			continue
 		}
 		// 取出来要设置的值
-		value := urlValues.Get(field.fieldName)
+		value := urlValues.GetString(field.fieldName)
 		if value == "" && field.required {
 			return fmt.Sprintf("field [%s] must be set", field.fieldName), ErrorTypeParameter
 		}

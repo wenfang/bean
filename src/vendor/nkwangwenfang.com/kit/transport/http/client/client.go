@@ -82,6 +82,12 @@ func Post(url string, body []byte, options ...Option) (*Response, error) {
 	return c.do(options...)
 }
 
+// Put Put方法调用
+func Put(url string, body []byte, options ...Option) (*Response, error) {
+	c := &Client{method: "PUT", url: url, body: body}
+	return c.do(options...)
+}
+
 func (c *Client) do(options ...Option) (*Response, error) {
 	for _, option := range options {
 		option(c)

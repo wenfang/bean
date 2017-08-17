@@ -3,7 +3,7 @@ package products
 import (
 	"context"
 
-	"nkwangwenfang.com/kit/transport/http/handler"
+	"nkwangwenfang.com/kit/transport/http/handler1"
 )
 
 type productsRequest struct {
@@ -21,4 +21,4 @@ func productsV1Controller(ctx context.Context, req interface{}) (interface{}, er
 	return &productsResponse{Result: request.ID}, nil
 }
 
-var ProductsV1Controller = handler.New(context.Background(), productsV1Controller, productsRequest{})
+var ProductsV1Controller = handler1.New(productsV1Controller, productsRequest{})
