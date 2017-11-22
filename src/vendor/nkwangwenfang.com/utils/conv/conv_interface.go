@@ -37,7 +37,7 @@ func ItoInt(d interface{}) (int, error) {
 	case string:
 		i, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
-			return 0, err
+			return 0, errors.WithStack(err)
 		}
 		return int(i), nil
 	}
@@ -74,7 +74,7 @@ func ItoInt64(d interface{}) (int64, error) {
 	case string:
 		i, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
-			return 0, err
+			return 0, errors.WithStack(err)
 		}
 		return i, nil
 	}
@@ -111,7 +111,7 @@ func ItoUint(d interface{}) (uint, error) {
 	case string:
 		u, err := strconv.ParseUint(v, 10, 64)
 		if err != nil {
-			return 0, err
+			return 0, errors.WithStack(err)
 		}
 		return uint(u), nil
 	}
@@ -148,7 +148,7 @@ func ItoUint64(d interface{}) (uint64, error) {
 	case string:
 		u, err := strconv.ParseUint(v, 10, 64)
 		if err != nil {
-			return 0, err
+			return 0, errors.WithStack(err)
 		}
 		return u, nil
 	}
@@ -185,7 +185,7 @@ func ItoFloat64(d interface{}) (float64, error) {
 	case string:
 		f, err := strconv.ParseFloat(v, 64)
 		if err != nil {
-			return 0.0, err
+			return 0.0, errors.WithStack(err)
 		}
 		return f, nil
 	}

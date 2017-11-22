@@ -7,9 +7,7 @@ import (
 	"nkwangwenfang.com/log"
 )
 
-var (
-	monitorMux = http.NewServeMux()
-)
+var monitorMux = http.NewServeMux()
 
 // Handle 定义monitor对pattern的处理handler
 func Handle(pattern string, handler http.Handler) { monitorMux.Handle(pattern, handler) }

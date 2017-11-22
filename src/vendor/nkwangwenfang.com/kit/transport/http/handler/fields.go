@@ -4,12 +4,13 @@ import (
 	"reflect"
 )
 
+// requestFields 解析请求的各个域
 type requestFields struct {
-	loc       string
-	name      string
-	fieldName string
-	typ       reflect.Type
-	required  bool
+	loc       string       // 域所在的位置path上或者param上
+	name      string       // 在结构中对应的名称
+	fieldName string       // 在path或param上的名称
+	typ       reflect.Type // 想转化为的类型
+	required  bool         // 是否是必须字段
 }
 
 func parseRequestFields(t reflect.Type) []requestFields {

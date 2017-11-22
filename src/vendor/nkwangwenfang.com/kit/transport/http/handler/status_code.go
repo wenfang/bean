@@ -1,4 +1,4 @@
-package handler1
+package handler
 
 // RspTyp 内部使用的响应结构类型
 type RspTyp struct {

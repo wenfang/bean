@@ -3,15 +3,17 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
-func parseRequestBody(req *http.Request, v interface{}) (interface{}, error) {
+func parseRequestBody(r *http.Request, request interface{}) error {
 	// 只处理POST/PUT/DELETE方法
-	if req.Method != "POST" && req.Method != "PUT" && req.Method != "DELETE" {
-		return nil, nil
+	if r.Method != "POST" && r.Method != "PUT" && r.Method != "DELETE" {
+		return nil
 	}
-	if err := json.NewDecoder(req.Body).Decode(v); err != nil {
-		return err.Error(), ErrorTypeBody
+	if err := json.NewDecoder(r.Body).Decode(request); err != nil {
+		return errors.Wrap(BeanBodyError, err.Error())
 	}
-	return nil, nil
+	return nil
 }
