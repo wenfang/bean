@@ -1,6 +1,9 @@
 package sarama
 
-import "sort"
+import (
+	"bufio"
+	"net"
+)
 
 type none struct{}
 
@@ -19,13 +22,11 @@ func (slice int32Slice) Swap(i, j int) {
 	slice[i], slice[j] = slice[j], slice[i]
 }
 
-func dupeAndSort(input []int32) []int32 {
+func dupInt32Slice(input []int32) []int32 {
 	ret := make([]int32, 0, len(input))
 	for _, val := range input {
 		ret = append(ret, val)
 	}
-
-	sort.Sort(int32Slice(ret))
 	return ret
 }
 
@@ -87,3 +88,65 @@ func (b ByteEncoder) Encode() ([]byte, error) {
 func (b ByteEncoder) Length() int {
 	return len(b)
 }
+
+// bufConn wraps a net.Conn with a buffer for reads to reduce the number of
+// reads that trigger syscalls.
+type bufConn struct {
+	net.Conn
+	buf *bufio.Reader
+}
+
+func newBufConn(conn net.Conn) *bufConn {
+	return &bufConn{
+		Conn: conn,
+		buf:  bufio.NewReader(conn),
+	}
+}
+
+func (bc *bufConn) Read(b []byte) (n int, err error) {
+	return bc.buf.Read(b)
+}
+
+// KafkaVersion instances represent versions of the upstream Kafka broker.
+type KafkaVersion struct {
+	// it's a struct rather than just typing the array directly to make it opaque and stop people
+	// generating their own arbitrary versions
+	version [4]uint
+}
+
+func newKafkaVersion(major, minor, veryMinor, patch uint) KafkaVersion {
+	return KafkaVersion{
+		version: [4]uint{major, minor, veryMinor, patch},
+	}
+}
+
+// IsAtLeast return true if and only if the version it is called on is
+// greater than or equal to the version passed in:
+//    V1.IsAtLeast(V2) // false
+//    V2.IsAtLeast(V1) // true
+func (v KafkaVersion) IsAtLeast(other KafkaVersion) bool {
+	for i := range v.version {
+		if v.version[i] > other.version[i] {
+			return true
+		} else if v.version[i] < other.version[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// Effective constants defining the supported kafka versions.
+var (
+	V0_8_2_0   = newKafkaVersion(0, 8, 2, 0)
+	V0_8_2_1   = newKafkaVersion(0, 8, 2, 1)
+	V0_8_2_2   = newKafkaVersion(0, 8, 2, 2)
+	V0_9_0_0   = newKafkaVersion(0, 9, 0, 0)
+	V0_9_0_1   = newKafkaVersion(0, 9, 0, 1)
+	V0_10_0_0  = newKafkaVersion(0, 10, 0, 0)
+	V0_10_0_1  = newKafkaVersion(0, 10, 0, 1)
+	V0_10_1_0  = newKafkaVersion(0, 10, 1, 0)
+	V0_10_2_0  = newKafkaVersion(0, 10, 2, 0)
+	V0_11_0_0  = newKafkaVersion(0, 11, 0, 0)
+	V1_0_0_0   = newKafkaVersion(1, 0, 0, 0)
+	minVersion = V0_8_2_0
+)
